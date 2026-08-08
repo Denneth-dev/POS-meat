@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2b6cb0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>🥩 Jing & Belen POS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        /* 🖼️ BACKGROUND — INAYOS PARA GUMANA SA CELLPHONE */
+        body {
+            background-color: #f0f4f8;
+            /* === ILAGAY ANG PANGALAN NG LITRATO ===
+               Kung ang litrato mo ay bg.jpg → url('bg.jpg')
+               Dapat KATABI ng html file!
+            */
+            background-image: url('bg.jpg');
+            background-repeat: no-repeat;
+            background-position: center top;
+            background-size: cover;
+            /* ❌ INALIS ang "fixed" na nagpapagalit sa cellphone */
+            background-attachment: scroll;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            font-size: 20px;
+            margin-bottom: 8px;
+            text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+        }
+
+        .date-display {
+            text-align: center;
+            font-size: 15px;
+            color: #2d3748;
+            font-weight: bold;
+            padding: 10px;
+            background: rgba(230, 255, 250, 0.92);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            backdrop-filter: blur(4px);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.94);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+            backdrop-filter: blur(6px);
+        }
+
+        h2 {
+            font-size: 16px;
+            color: #2b6cb0;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 12px;
+        }
+
+        h3 {
+            font-size: 14px;
+            margin: 15px 0 8px;
+            color: #e53e3e;
+        }
+
+        .product-list-box {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 12px;
+            background: rgba(247,250,252,0.6);
+        }
+
+        .product-category {
+            margin-bottom: 10px;
+        }
+
+        .category-title {
+            font-weight: bold;
+            color: #c53030;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .product-btn {
+            display: inline-block;
+            padding: 14px 18px; /* ✅ MAS MALAKI — madaling pindutin */
+            margin: 4px;
+            background: #f7fafc;
+            border: 2px solid #cbd5e0;
+            border-radius: 10px;
+            font-size: 15px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s ease;
+            position: relative; /* ✅ Siguradong napipindot */
+            z-index: 10;
+        }
+
+        .product-btn:hover {
+            background: #ebf8ff;
+            border-color: #3182ce;
+            color: #2b6cb0;
+            transform: translateY(-1px);
+        }
+
+        .product-btn:active {
+            background: #ebf8ff;
+            border-color: #3182ce;
+            transform: scale(0.97);
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a5568;
+            display: block;
+            margin-top: 8px;
+            margin-bottom: 4px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 12px;
+            font-size: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            outline: none;
+            transition: border 0.2s ease;
+        }
+
+        input:focus {
+            border-color: #3182ce;
+            box-shadow: 0 0 0 3px rgba(49,130,206,0.15);
+        }
+
+        button {
+            width: 100%;
+            padding: 16px; /* ✅ MAS MALAKI — madaling pindutin */
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 8px;
+            user-select: none;
+            transition: all 0.15s ease;
+            position: relative; /* ✅ Siguradong napipindot */
+            z-index: 10;
+            pointer-events: auto; /* ✅ Siguradong naririnig ang pindot */
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            filter: brightness(1.05);
+        }
+
+        button:active {
+            transform: scale(0.98);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            filter: brightness(0.95);
+        }
+
+        .btn-add { background: #38a169; color: white; }
+        .btn-add:hover { background: #2f855a; }
+
+        .btn-save { background: #3182ce; color: white; }
+        .btn-save:hover { background: #2b6cb0; }
+
+        .btn-expense { background: #ed8936; color: white; }
+        .btn-expense:hover { background: #dd6b20; }
+
+        .btn-admin { background: #805ad5; color: white; }
+        .btn-admin:hover { background: #6b46c1; }
+
+        .btn-logout { background: #e53e3e; color: white; display: none; }
+        .btn-logout:hover { background: #c53030; }
+        .admin-mode .btn-logout { display: block; }
+
+        .btn-delete { 
+            width: auto;
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 6px;
+            background: #e53e3e;
+            color: white;
+            margin: 0 0 0 8px;
+        }
+        .btn-delete:hover { background: #c53030; }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 10px;
+            margin: 6px 0;
+            background: rgba(247,250,252,0.7);
+            border-radius: 10px;
+            font-size: 15px;
+        }
+
+        .total-box {
+            background: rgba(254,245,231,0.92);
+            padding: 14px;
+            border-radius: 10px;
+            margin-top: 12px;
+            text-align: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .total-label { font-size: 15px; color: #744210; }
+        .total-amount { font-size: 26px; font-weight: bold; color: #c53030; margin-top: 4px; }
+
+        .sales-record, .expense-record {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .sale-item, .expense-item {
+            padding: 12px 10px;
+            margin: 6px 0;
+            background: rgba(240,255,244,0.7);
+            border-left: 4px solid #38a169;
+            border-radius: 10px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .expense-item {
+            background: rgba(255,245,245,0.7);
+            border-left-color: #e53e3e;
+        }
+
+        .admin-totals {
+            background: rgba(235,248,255,0.92);
+            padding: 14px;
+            border-radius: 10px;
+            margin-top: 12px;
+            backdrop-filter: blur(4px);
+        }
+
+        .admin-totals.hidden { display: none; }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 15px;
+        }
+
+        .total-row.net {
+            border-top: 2px dashed #cbd5e0;
+            margin-top: 6px;
+            padding-top: 10px;
+            font-weight: bold;
+            font-size: 17px;
+            color: #2f855a;
+        }
+
+        .locked-msg {
+            color: #718096;
+            font-size: 12px;
+            font-style: italic;
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(247,250,252,0.8);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .expense-divider {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 99;
+        }
+        .overlay.show { display: block; }
+
+        .admin-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 24px;
+            border-radius: 14px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.3);
+            z-index: 100;
+            width: 90%;
+            max-width: 320px;
+        }
+        .admin-modal.show { display: block; }
+        .admin-modal h3 { margin-bottom: 14px; text-align: center; color: #2b6cb0; }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 200;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<div class="overlay" id="adminOverlay" onclick="closeAdminModal()"></div>
+<div class="admin-modal" id="adminModal">
+    <h3>🔐 Admin Login</h3>
+    <input type="password" id="adminPass" placeholder="Enter Password">
+    <div style="display:flex; gap:8px; margin-top:12px;">
+        <button class="btn-save" onclick="loginAdmin()">Login</button>
+        <button class="btn-expense" onclick="closeAdminModal()">Close</button>
+    </div>
+</div>
+
+<div class="container" id="mainApp">
+    <h1>🥩 JING & BELEN POS</h1>
+    <div class="date-display" id="currentDate"></div>
+
+    <div class="main-grid">
+        <div class="card">
+            <h2>🛒 List Product</h2>
+
+            <div class="product-list-box">
+                <div class="product-category">
+                    <div class="category-title">🐷 PORK</div>
+                    <div class="product-btn" onclick="selectProduct('Liempo')">Liempo</div>
+                    <div class="product-btn" onclick="selectProduct('Porkchop')">Porkchop</div>
+                    <div class="product-btn" onclick="selectProduct('Pata')">Pata</div>
+                    <div class="product-btn" onclick="selectProduct('Giniling')">Giniling</div>
+                    <div class="product-btn" onclick="selectProduct('Buto-buto')">Buto-buto</div>
+                </div>
+                <div class="product-category">
+                    <div class="category-title">🐔 CHICKEN</div>
+                    <div class="product-btn" onclick="selectProduct('Pechay/Pitso')">Breast/Pitso</div>
+                    <div class="product-btn" onclick="selectProduct('Hita')">Hita</div>
+                    <div class="product-btn" onclick="selectProduct('Atay/Balunan')">Atay/Balunan</div>
+                    <div class="product-btn" onclick="selectProduct('Drumstick')">Drumstick</div>
+                </div>
+            </div>
+
+            <label>Product Name:</label>
+            <input type="text" id="productName" placeholder="Select from above or type here">
+            <label>Amount to Pay:</label>
+            <input type="number" id="productAmount" placeholder="Enter the amount" step="0.00">
+            <button class="btn-add" onclick="addItem()">➕ Add to List</button>
+
+            <div id="cartList" style="margin-top: 10px;"></div>
+
+            <div class="total-box">
+                <div class="total-label">GRAND TOTAL:</div>
+                <div class="total-amount" id="grandTotal">₱ 0.00</div>
+            </div>
+
+            <button class="btn-save" onclick="saveSale()">✅ RECORD THE SALE</button>
+
+            <div class="expense-divider">
+                <h3>📝 RECORD EXPENSES</h3>
+                <label>For what:</label>
+                <input type="text" id="expenseName" placeholder="E.g., Electricity, Water...">
+                <label>Expense Amount:</label>
+                <input type="number" id="expenseAmount" placeholder="Enter the amount" step="0.00">
+                <button class="btn-expense" onclick="addExpense()">➕ Record Expense</button>
+            </div>
+
+            <p class="locked-msg" id="sellerNote">🔒 Seller Mode — Makikita lang ang listahan ng benta</p>
+        </div>
+
+        <div class="card">
+            <h2>📋 LIST OF SALES</h2>
+            <div class="sales-record" id="salesRecord"></div>
+
+            <h3>📋 LIST OF EXPENSES</h3>
+            <div class="expense-record" id="expenseRecord"></div>
+
+            <div class="admin-totals hidden" id="adminTotals">
+                <div class="total-row">
+                    <span>💰 Total Sales:</span>
+                    <span id="totalSales">₱ 0.00</span>
+                </div>
+                <div class="total-row">
+                    <span>📉 Total Expenses:</span>
+                    <span id="totalExpenses">₱ 0.00</span>
+                </div>
+                <div class="total-row net">
+                    <span>💵 NET INCOME:</span>
+                    <span id="netIncome">₱ 0.00</span>
+                </div>
+            </div>
+
+            <button class="btn-admin" onclick="openAdminModal()">🔐 Admin Panel</button>
+            <button class="btn-logout" onclick="logoutAdmin()">🔓 Logout Admin</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const ADMIN_PASSWORD = 'Piodena@0324';
+let isAdmin = false;
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function getTodayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function formatDateDisplay() {
+    return new Date().toLocaleDateString('tl-PH', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+}
+
+document.getElementById('currentDate').textContent = formatDateDisplay();
+const TODAY_KEY = getTodayKey();
+
+function loadData() {
+    const all = JSON.parse(localStorage.getItem('meatShopAllData') || '{}');
+    const day = all[TODAY_KEY] || { sales: [], expenses: [] };
+    return day;
+}
+
+let { sales, expenses } = loadData();
+let cart = [];
+
+renderSales();
+renderExpenses();
+updateAdminTotals();
+
+function selectProduct(name) {
+    document.getElementById('productName').value = name;
+    document.getElementById('productAmount').focus();
+}
+
+function addItem() {
+    const name = document.getElementById('productName').value.trim();
+    const amount = parseFloat(document.getElementById('productAmount').value) || 0;
+    if (!name || amount <= 0) { alert('Please fill in the information correctly!'); return; }
+    cart.push({ name, amount });
+    document.getElementById('productName').value = '';
+    document.getElementById('productAmount').value = '';
+    renderCart();
+    showToast('✅ Added to the list!');
+}
+
+function renderCart() {
+    const list = document.getElementById('cartList');
+    list.innerHTML = '';
+    let total = 0;
+    cart.forEach((item) => {
+        total += item.amount;
+        list.innerHTML += `
+            <div class="cart-item">
+                <strong>${item.name}</strong>
+                <span>₱ ${item.amount.toFixed(2)}</span>
+            </div>
+        `;
+    });
+    document.getElementById('grandTotal').textContent = '₱ ' + total.toFixed(2);
+}
+
+function saveSale() {
+    if (cart.length === 0) { alert('The list is empty!'); return; }
+    const totalAmount = cart.reduce((sum, i) => sum + i.amount, 0);
+    const timeNow = new Date().toLocaleTimeString('tl-PH', { hour: '2-digit', minute: '2-digit' });
+    sales.push({ time: timeNow, items: [...cart], total: totalAmount });
+    saveData();
+    renderSales();
+    updateAdminTotals();
+    showToast(`✅ Recorded! Total: ₱ ${totalAmount.toFixed(2)}`);
+    cart = [];
+    renderCart();
+}
+
+function renderSales() {
+    const list = document.getElementById('salesRecord');
+    list.innerHTML = '';
+    sales.forEach((sale, idx) => {
+        let itemsHtml = sale.items.map(i => `${i.name}: ₱${i.amount.toFixed(2)}`).join('<br>');
+        list.innerHTML += `
+            <div class="sale-item">
+                <div>
+                    <strong>🕐 ${sale.time} — ₱ ${sale.total.toFixed(2)}</strong><br>
+                    ${itemsHtml}
+                </div>
+                ${isAdmin ? `<button class="btn-delete" onclick="deleteSale(${idx})">Delete</button>` : ''}
+            </div>
+        `;
+    });
+}
+
+function deleteSale(index) {
+    if (!isAdmin) return;
+    if (confirm('Are you sure you want to delete this sale?')) {
+        sales.splice(index, 1);
+        saveData();
+        renderSales();
+        updateAdminTotals();
+        showToast('🗑️ Deleted!');
+    }
+}
+
+function addExpense() {
+    const name = document.getElementById('expenseName').value.trim();
+    const amount = parseFloat(document.getElementById('expenseAmount').value) || 0;
+    if (!name || amount <= 0) { alert('Please fill in the information correctly!'); return; }
+    const timeNow = new Date().toLocaleTimeString('tl-PH', { hour: '2-digit', minute: '2-digit' });
+    expenses.push({ time: timeNow, name, amount });
+    document.getElementById('expenseName').value = '';
+    document.getElementById('expenseAmount').value = '';
+    saveData();
+    renderExpenses();
+    updateAdminTotals();
+    showToast('✅ Expense recorded!');
+}
+
+function renderExpenses() {
+    const list = document.getElementById('expenseRecord');
+    list.innerHTML = '';
+    expenses.forEach((exp, idx) => {
+        list.innerHTML += `
+            <div class="expense-item">
+                <div>
+                    <strong>🕐 ${exp.time}</strong> — ${exp.name}<br>
+                    ₱ ${exp.amount.toFixed(2)}
+                </div>
+                ${isAdmin ? `<button class="btn-delete" onclick="deleteExpense(${idx})">Delete</button>` : ''}
+            </div>
+        `;
+    });
+}
+
+function deleteExpense(index) {
+    if (!isAdmin) return;
+    if (confirm('Are you sure you want to delete this expense?')) {
+        expenses.splice(index, 1);
+        saveData();
+        renderExpenses();
+        updateAdminTotals();
+        showToast('🗑️ Deleted!');
+    }
+}
+
+function updateAdminTotals() {
+    const totalSales = sales.reduce((sum, s) => sum + s.total, 0);
+    const totalExp = expenses.reduce((sum, e) => sum + e.amount, 0);
+    const net = totalSales - totalExp;
+    document.getElementById('totalSales').textContent = '₱ ' + totalSales.toFixed(2);
+    document.getElementById('totalExpenses').textContent = '₱ ' + totalExp.toFixed(2);
+    document.getElementById('netIncome').textContent = '₱ ' + net.toFixed(2);
+}
+
+function saveData() {
+    const all = JSON.parse(localStorage.getItem('meatShopAllData') || '{}');
+    all[TODAY_KEY] = { sales, expenses };
+    localStorage.setItem('meatShopAllData', JSON.stringify(all));
+}
+
+function openAdminModal() {
+    document.getElementById('adminOverlay').classList.add('show');
+    document.getElementById('adminModal').classList.add('show');
+    document.getElementById('adminPass').value = '';
+}
+
+function closeAdminModal() {
+    document.getElementById('adminOverlay').classList.remove('show');
+    document.getElementById('adminModal').classList.remove('show');
+}
+
+function loginAdmin() {
+    const pass = document.getElementById('adminPass').value;
+    if (pass === ADMIN_PASSWORD) {
+        isAdmin = true;
+        document.getElementById('adminTotals').classList.remove('hidden');
+        document.getElementById('sellerNote').style.display = 'none';
+        document.getElementById('mainApp').classList.add('admin-mode');
+        closeAdminModal();
+        showToast('🔓 Admin Mode enabled!');
+        renderSales();
+        renderExpenses();
+    } else {
+        alert('❌ Incorrect Password!');
+    }
+}
+
+function logoutAdmin() {
+    if (confirm('🔓 Are you sure you want to logout as Admin?')) {
+        isAdmin = false;
+        document.getElementById('adminTotals').classList.add('hidden');
+        document.getElementById('sellerNote').style.display = 'block';
+        document.getElementById('mainApp').classList.remove('admin-mode');
+        showToast('✅ Logged out!');
+        renderSales();
+        renderExpenses();
+    }
+}
+</script>
+</body>
+</html>
